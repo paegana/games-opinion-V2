@@ -12,7 +12,7 @@ export default defineConfig({
     port: 5173,
     open: true,
   },
-  base: "/", // Cambia la base para usar la raíz
+  base: "/games-opinion/", // Cambia la base para usar la raíz
   build: {
     outDir: "dist",
     sourcemap: true,
