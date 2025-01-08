@@ -1,0 +1,33 @@
+# Sistema operativo y archivos innecesarios
+.DS_Store
+Thumbs.db
+
+# Dependencias
+node_modules
+
+# Archivos generados por build
+/dist
+
+# Archivos de configuración local y de entorno
+.env
+.env.local
+.env.*.local
+
+# Archivos de log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Archivos y directorios del editor
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Otros
+*.log
+*.cache
