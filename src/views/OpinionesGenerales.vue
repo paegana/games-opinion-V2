@@ -40,7 +40,7 @@ import FormularioCoins from "@/components/FormularioCoins.vue";
 export default {
   name: "OpinionesGenerales",
   components: {
-    FormularioCoins, // Importamos el formulario de Coins
+    FormularioCoins,
   },
   setup() {
     const userStore = useUserStore();
@@ -48,25 +48,25 @@ export default {
     // Verificar si el usuario es administrador
     const isAdmin = computed(() => userStore.isAdmin);
 
-    // Obtener todas las opiniones
+    // Obtener todas las opiniones del usuario autenticado o de todos si es admin
     const opinions = computed(() => {
       const allOpinions = [];
       Object.keys(userStore.userData).forEach((user) => {
         const userOpinions = userStore.userData[user]?.opinions || [];
         userOpinions.forEach((opinion) => {
           if (isAdmin.value || user === userStore.loggedInUser) {
-            allOpinions.push({ ...opinion, user }); // Añadir nombre del usuario
+            allOpinions.push({ ...opinion, user });
           }
         });
       });
       return allOpinions;
     });
 
-    // Mapeo de juegos con sus opiniones y likes
+    // Mapeo de juegos con opiniones y likes
     const gamesWithOpinions = computed(() => {
       const games = {};
 
-      // Mapear opiniones por juego
+      // Mapear opiniones
       opinions.value.forEach((opinion) => {
         if (!games[opinion.game]) {
           games[opinion.game] = { title: opinion.game, likes: 0, opinions: [] };
@@ -74,29 +74,34 @@ export default {
         games[opinion.game].opinions.push(opinion);
       });
 
+      // Agregar juegos con solo likes
+      Object.keys(userStore.userData).forEach((user) => {
+        const userLikes =
+          user === userStore.loggedInUser || isAdmin.value
+            ? userStore.userData[user]?.likes || []
+            : [];
+        userLikes.forEach((like) => {
+          if (!games[like]) {
+            games[like] = { title: like, likes: 0, opinions: [] };
+          }
+        });
+      });
+
       // Contar likes por juego
       Object.keys(games).forEach((gameTitle) => {
-        games[gameTitle].likes = Object.values(userStore.userData).reduce(
+        games[gameTitle].likes = Object.keys(userStore.userData).reduce(
           (count, user) => {
-            const likes = user.likes || [];
+            const likes =
+              user === userStore.loggedInUser || isAdmin.value
+                ? userStore.userData[user]?.likes || []
+                : [];
             return count + (likes.includes(gameTitle) ? 1 : 0);
           },
           0
         );
       });
 
-      // Agregar juegos con solo likes (sin opiniones)
-      const allGames = Object.values(games);
-      const gamesWithLikesOnly = Object.values(userStore.userData)
-        .flatMap((user) => user.likes || [])
-        .filter((gameTitle) => !games[gameTitle])
-        .map((gameTitle) => ({
-          title: gameTitle,
-          likes: 1,
-          opinions: [],
-        }));
-
-      return allGames.concat(gamesWithLikesOnly);
+      return Object.values(games);
     });
 
     // Función para formatear la fecha

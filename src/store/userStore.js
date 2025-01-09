@@ -11,16 +11,13 @@ export const useUserStore = defineStore("user", {
     isAdmin: false, // Verifica si el usuario autenticado es administrador
   }),
   getters: {
-    // Verifica si hay un usuario autenticado
     isAuthenticated: (state) => !!state.loggedInUser,
 
-    // Obtiene los likes de un usuario autenticado
     getUserLikes: (state) => {
       if (!state.loggedInUser) return [];
       return state.userData[state.loggedInUser]?.likes || [];
     },
 
-    // Obtiene las opiniones de un usuario autenticado
     getUserOpinions: (state) => (gameTitle) => {
       if (!state.loggedInUser) return [];
       return (
@@ -30,7 +27,6 @@ export const useUserStore = defineStore("user", {
       );
     },
 
-    // Obtiene todas las opiniones de todos los usuarios (solo si es administrador)
     getAllOpinions: (state) => {
       const allOpinions = [];
       for (const user in state.userData) {
@@ -47,7 +43,6 @@ export const useUserStore = defineStore("user", {
       return allOpinions;
     },
 
-    // Obtiene todos los likes agrupados por juego y usuarios que los marcaron
     getAllLikes: (state) => {
       const likeSummary = {};
       for (const user in state.userData) {
@@ -64,29 +59,28 @@ export const useUserStore = defineStore("user", {
     },
   },
   actions: {
-    // Login para usuarios y administradores
     loginUser(name, password) {
+      // Verificar credenciales de administrador
       if (
         name === this.adminData.adminName &&
         password === this.adminData.adminPassword
       ) {
-        // Login como administrador
         this.isAdmin = true;
         this.loggedInUser = name;
-        return;
+        return true;
       }
 
-      if (this.userData[name]) {
-        // Login como usuario normal
-        this.loggedInUser = name;
-        this.isAdmin = false;
-        return;
+      // Registrar automáticamente si el usuario no existe
+      if (!this.userData[name]) {
+        this.userData[name] = { likes: [], opinions: [] }; // Crear un nuevo usuario
       }
 
-      throw new Error("Usuario o contraseña incorrectos.");
+      // Iniciar sesión como usuario normal
+      this.loggedInUser = name;
+      this.isAdmin = false;
+      return true;
     },
 
-    // Registro de un nuevo administrador
     createAdminUser(name, password) {
       if (this.adminData.adminName) {
         throw new Error("Ya existe un administrador registrado.");
@@ -100,13 +94,11 @@ export const useUserStore = defineStore("user", {
       this.loggedInUser = name;
     },
 
-    // Cerrar sesión
     logout() {
       this.loggedInUser = null;
       this.isAdmin = false;
     },
 
-    // Añadir un like a un juego
     addLike(gameTitle) {
       if (!this.loggedInUser) {
         throw new Error("Debes iniciar sesión para dar like.");
@@ -122,7 +114,6 @@ export const useUserStore = defineStore("user", {
       }
     },
 
-    // Quitar un like de un juego
     removeLike(gameTitle) {
       if (!this.loggedInUser) {
         throw new Error("Debes iniciar sesión para quitar el like.");
@@ -133,7 +124,6 @@ export const useUserStore = defineStore("user", {
       );
     },
 
-    // Añadir una opinión a un juego
     addOpinion(gameTitle, opinionText) {
       if (!this.loggedInUser) {
         throw new Error("Debes iniciar sesión para opinar.");

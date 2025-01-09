@@ -57,10 +57,14 @@ export default {
 
       const fullName = `${this.name.trim()} ${this.lastName.trim()}`;
       try {
-        this.userStore.loginUser(fullName); // Inicia sesión en el store
-        this.errorMessage = "";
-        const redirectPath = this.route.query.redirect || "/"; // Redirigir a la página anterior o al home
-        this.router.push(redirectPath);
+        const success = this.userStore.loginUser(fullName); // Inicia sesión o registra al usuario
+        if (success) {
+          this.errorMessage = "";
+          const redirectPath = this.route.query.redirect || "/"; // Redirigir a la página anterior o al home
+          this.router.push(redirectPath);
+        } else {
+          this.errorMessage = "Error al iniciar sesión. Inténtalo nuevamente.";
+        }
       } catch (error) {
         this.errorMessage = error.message || "Error al iniciar sesión.";
       }

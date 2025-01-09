@@ -8,11 +8,7 @@ export default defineConfig({
       "@": "/src",
     },
   },
-  server: {
-    port: 5173,
-    open: true, // Abre automáticamente en el navegador
-  },
-  base: "/games-opinion-V2/", // Nombre del repositorio en GitHub
+  base: "/games-opinion-V2/", // Nombre del repositorio de GitHub
   build: {
     outDir: "dist",
     sourcemap: true,

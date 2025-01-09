@@ -12,69 +12,59 @@ const routes = [
   {
     path: "/",
     name: "Home",
-    component: Home,
+    component: Home, // Página principal
   },
   {
     path: "/opiniones/:title",
     name: "Opiniones",
     component: Opiniones,
-    props: true,
-    meta: { requiresAuth: true },
+    props: true, // Permite pasar params como props
+    meta: { requiresAuth: true }, // Solo usuarios autenticados
   },
   {
     path: "/login",
     name: "Login",
-    component: Login,
+    component: Login, // Página de login de usuarios
   },
   {
     path: "/admin-login",
     name: "AdminLogin",
-    component: AdminLogin,
+    component: AdminLogin, // Página de login de administradores
   },
   {
     path: "/administracion",
     name: "Administracion",
-    component: Administracion,
-    meta: { requiresAdmin: true },
+    component: Administracion, // Vista de administración
+    meta: { requiresAdmin: true }, // Solo accesible por administradores
   },
   {
     path: "/opiniones",
     name: "OpinionesGenerales",
-    component: OpinionesGenerales,
-    meta: { requiresAuth: true },
+    component: OpinionesGenerales, // Vista de opiniones generales
+    meta: { requiresAuth: true }, // Solo usuarios autenticados
   },
   {
     path: "/:catchAll(.*)",
-    name: "NotFound",
-    component: NotFound,
+    redirect: "/", // Redirige rutas no encontradas a la página principal
   },
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory("/games-opinion-V2/"), // Base URL para GitHub Pages
   routes,
 });
 
-// Guard global para manejo de accesos
+// Guard global para proteger rutas
 router.beforeEach((to, from, next) => {
-  const userStore = useUserStore(); // Accede al store global de usuarios
+  const userStore = useUserStore();
 
-  // Manejo de rutas protegidas
   if (to.meta.requiresAuth && !userStore.isAuthenticated) {
-    return next({
-      name: "Login",
-      query: { redirect: to.fullPath }, // Redirige al usuario después de autenticarse
-    });
+    next({ name: "Login", query: { redirect: to.fullPath } });
+  } else if (to.meta.requiresAdmin && !userStore.isAdmin) {
+    next({ name: "AdminLogin", query: { redirect: to.fullPath } });
+  } else {
+    next();
   }
-
-  if (to.meta.requiresAdmin && !userStore.isAdmin) {
-    return next({
-      name: "AdminLogin",
-      query: { redirect: to.fullPath }, // Redirige al usuario después de autenticarse
-    });
-  }
-
-  next(); // Permite el acceso si no se activa ninguna restricción
 });
 
 export default router;
